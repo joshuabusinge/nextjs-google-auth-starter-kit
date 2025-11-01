@@ -26,7 +26,7 @@ export async function GET(req: Request) {
             name: 'google_access_token',
             value: tokens.access_token || '',  // the access token
             httpOnly: true,  // for security, the cookie is accessible only by the server
-            secure: process.env.NODE_ENV === 'production',  // send cookie over HTTPS only in production
+            // secure: process.env.NODE_ENV === 'production',  // send cookie over HTTPS only in production
             path: '/',  // cookie is available on every route
             maxAge: 60 * 60 * 24 * 7,  // 1 week
         });
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
             name: 'google_id_token',
             value: tokens.id_token || '',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            // secure: process.env.NODE_ENV === 'production',
             path: '/',
             maxAge: 60 * 60 * 24 * 7,
         });
