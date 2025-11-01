@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
-import { cookies } from 'next/headers';
 import { Readable } from 'stream';
 
 function convertToWebStream(nodeStream: Readable): ReadableStream<Uint8Array> {
