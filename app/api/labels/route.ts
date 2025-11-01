@@ -98,8 +98,8 @@ export async function POST(req: Request) {
             // 3. Update existing CSV file
             await drive.files.update({
                 fileId: csvFileId,
+                addParents: folderId, // A string: the ID of the folder to add as a parent.
                 media,
-                addParents: [folderId], // Ensure it remains in the folder
             });
         } else {
             // 4. Create new CSV file
