@@ -7,6 +7,9 @@ export async function GET(req: Request) {
     const code = searchParams.get('code');
     const error = searchParams.get('error');
 
+    console.log('[OAuth2 Callback] Host:', req.headers.get('host'));
+    console.log('[OAuth2 Callback] X-Forwarded-Proto:', req.headers.get('x-forwarded-proto'));
+
     if (error) {
         return NextResponse.json({ error: 'Google OAuth Error: ' + error });
       }
