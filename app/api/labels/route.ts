@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
 import { cookies } from 'next/headers';
+import { Readable } from 'stream';
 
 const CSV_FILE_NAME = 'image_labels.csv';
 const CSV_HEADERS = 'timestamp,userEmail,imageId,imageName,score1,score2,score3,score4,score5,score6,comments\n';
@@ -68,9 +69,10 @@ export async function POST(req: Request) {
                 const response = await drive.files.get({ fileId: csvFileId, alt: 'media' }, { responseType: 'stream' });
                 const chunks: Buffer[] = [];
                 await new Promise<void>((resolve, reject) => {
-                    (response.data as any).on('data', (chunk: Buffer) => chunks.push(chunk));
-                    (response.data as any).on('end', () => resolve());
-                    (response.data as any).on('error', reject);
+                    const nodeStream = response.data as Readable;
+                    nodeStream.on('data', (chunk: Buffer) => chunks.push(chunk));
+                    nodeStream.on('end', () => resolve());
+                    nodeStream.on('error', reject);
                 });
                 existingContent = Buffer.concat(chunks).toString('utf8');
             } catch (downloadError: unknown) {
