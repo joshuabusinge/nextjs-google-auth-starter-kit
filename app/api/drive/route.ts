@@ -1,0 +1,75 @@
+import { NextResponse } from 'next/server';
+import { google } from 'googleapis';
+import oauth2Client from '../../lib/google-oauth';
+import { cookies } from 'next/headers';
+import { Readable } from 'stream';
+
+function convertToWebStream(nodeStream: Readable): ReadableStream<Uint8Array> {
+    return new ReadableStream({
+        start(controller) {
+            nodeStream.on('data', (chunk) => {
+                controller.enqueue(chunk);
+            });
+            nodeStream.on('end', () => {
+                controller.close();
+            });
+            nodeStream.on('error', (err) => {
+                controller.error(err);
+            });
+        },
+        cancel() {
+            nodeStream.destroy();
+        },
+    });
+}
+
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const folderId = searchParams.get('folderId');
+    const fileId = searchParams.get('fileId');
+
+    const accessToken = cookies().get('google_access_token')?.value;
+
+    if (!accessToken) {
+        return NextResponse.json({ error: 'No access token found' }, { status: 401 });
+    }
+
+    oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+    if (fileId) {
+        // Handle single file download
+        try {
+            const response = await drive.files.get({
+                fileId: fileId,
+                alt: 'media',
+            }, { responseType: 'stream' });
+
+            const headers = new Headers();
+            headers.set('Content-Type', response.headers['content-type'] as string);
+            headers.set('Content-Disposition', response.headers['content-disposition'] as string);
+
+            const webStream = convertToWebStream(response.data as Readable);
+
+            return new NextResponse(webStream, { headers });
+        } catch (error: unknown) {
+            console.error('Error fetching Google Drive file:', (error as Error).message);
+            return NextResponse.json({ error: 'Failed to fetch file from Google Drive', details: (error as Error).message }, { status: 500 });
+        }
+    } else if (folderId) {
+        // Handle folder listing (existing logic)
+        try {
+            const response = await drive.files.list({
+                q: `'${folderId}' in parents and mimeType contains 'image/'`,
+                fields: 'nextPageToken, files(id, name, mimeType, webContentLink, webViewLink)',
+                spaces: 'drive',
+            });
+            return NextResponse.json(response.data.files);
+        } catch (error: unknown) {
+            console.error('Error listing Google Drive files:', (error as Error).message);
+            return NextResponse.json({ error: 'Failed to list files from Google Drive', details: (error as Error).message }, { status: 500 });
+        }
+    } else {
+        return NextResponse.json({ error: 'Folder ID or File ID is required' }, { status: 400 });
+    }
+}

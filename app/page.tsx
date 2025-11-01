@@ -4,6 +4,8 @@ import oauth2Client from "./lib/google-oauth";
 import { Button } from "@/components/ui/button";
 export default function Home() {
   const SCOPE = [
+    "openid",
+    "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/documents",
     "https://www.googleapis.com/auth/drive.file",

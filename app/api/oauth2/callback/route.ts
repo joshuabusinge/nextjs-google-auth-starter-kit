@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     //let's exchange the code for an access token
     try {
         const { tokens } = await oauth2Client.getToken(code);
-        console.log(tokens);
+        console.log("Tokens received:", tokens);
         //this stores the token in the oauth2Client
         //oauth2Client.setCredentials(tokens);        
         //store the token in a cookie or a database
@@ -29,6 +29,15 @@ export async function GET(req: Request) {
             secure: process.env.NODE_ENV === 'production',  // send cookie over HTTPS only in production
             path: '/',  // cookie is available on every route
             maxAge: 60 * 60 * 24 * 7,  // 1 week
+        });
+
+        cookies().set({
+            name: 'google_id_token',
+            value: tokens.id_token || '',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
         });
 
         return NextResponse.redirect(new URL('/dashboard', req.url));
