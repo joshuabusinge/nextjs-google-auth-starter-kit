@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import  oauth2Client  from '../../../lib/google-oauth';
-import { cookies } from 'next/headers';
+// import { cookies } from 'next/headers'; // Removed as cookies are now set client-side
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
