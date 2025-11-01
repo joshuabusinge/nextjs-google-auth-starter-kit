@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
-import { cookies } from 'next/headers';
+// import { cookies } from 'next/headers'; // No longer reading cookies directly
 import { Readable } from 'stream';
 import { drive_v3 } from 'googleapis';
 
@@ -17,11 +17,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing required labeling data' }, { status: 400 });
         }
 
-        const accessToken = cookies().get('google_access_token')?.value;
-        const idToken = cookies().get('google_id_token')?.value;
+        const authorization = req.headers.get('authorization');
+        const accessToken = authorization?.split(' ')[1];
+        const idToken = req.headers.get('x-google-id-token');
 
         if (!accessToken || !idToken) {
-            return NextResponse.json({ error: 'Authentication tokens not found' }, { status: 401 });
+            return NextResponse.json({ error: 'Authentication tokens not found in headers' }, { status: 401 });
         }
 
         oauth2Client.setCredentials({ access_token: accessToken });

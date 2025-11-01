@@ -66,12 +66,21 @@ export default function DashboardPage() {
     setError(null);
 
     try {
+      const accessToken = Cookies.get('google_access_token');
+      const idToken = Cookies.get('google_id_token');
+
+      if (!accessToken || !idToken) {
+        throw new Error("Authentication tokens not found in client-side cookies.");
+      }
+
       const response = await fetch('/api/labels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'X-Google-Id-Token': idToken,
         },
-        credentials: 'include',
+        // credentials: 'include', // Not needed as tokens are in headers
         body: JSON.stringify({
           imageId: currentImage.id,
           imageName: currentImage.name,
@@ -199,7 +208,16 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/drive?folderId=${folderId}`);
+        const accessToken = Cookies.get('google_access_token');
+        if (!accessToken) {
+          throw new Error("Access token not found in client-side cookies.");
+        }
+
+        const response = await fetch(`/api/drive?folderId=${folderId}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
