@@ -22,30 +22,16 @@ export async function GET(req: Request) {
     try {
         const { tokens } = await oauth2Client.getToken(code);
         console.log("Tokens received:", tokens);
-        //this stores the token in the oauth2Client
-        //oauth2Client.setCredentials(tokens);        
-        //store the token in a cookie or a database
-        cookies().set({
-            name: 'google_access_token',
-            value: tokens.access_token || '',  // the access token
-            httpOnly: true,  // for security, the cookie is accessible only by the server
-            secure: process.env.NODE_ENV === 'production',  // send cookie over HTTPS only in production
-            path: '/',  // cookie is available on every route
-            maxAge: 60 * 60 * 24 * 7,  // 1 week
-            domain: new URL(req.url).hostname.includes('vercel.app') ? (req.headers.get('host') || undefined) : undefined, // Set domain for Vercel deployments
-        });
 
-        cookies().set({
-            name: 'google_id_token',
-            value: tokens.id_token || '',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7,
-            domain: new URL(req.url).hostname.includes('vercel.app') ? (req.headers.get('host') || undefined) : undefined, // Set domain for Vercel deployments
-        });
+        const dashboardUrl = new URL('/dashboard', req.url);
+        if (tokens.access_token) {
+            dashboardUrl.searchParams.set('access_token', tokens.access_token);
+        }
+        if (tokens.id_token) {
+            dashboardUrl.searchParams.set('id_token', tokens.id_token);
+        }
 
-        return NextResponse.redirect(new URL('/dashboard', req.url));
+        return NextResponse.redirect(dashboardUrl);
 
     } catch (error) {
         return NextResponse.json({ error: 'Failed to exchange code for access token' + error });

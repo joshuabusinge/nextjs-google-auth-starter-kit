@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
+import Cookies from 'js-cookie';
 
 interface DriveFile {
   id: string;
@@ -167,6 +168,27 @@ export default function DashboardPage() {
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [zoomLevel, pan, isPanning, startPan]);
+
+  // Effect to read tokens from URL and set client-side cookies
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get('access_token');
+    const idToken = params.get('id_token');
+
+    if (accessToken) {
+      Cookies.set('google_access_token', accessToken, { expires: 7, secure: true, sameSite: 'Lax' });
+      params.delete('access_token');
+    }
+    if (idToken) {
+      Cookies.set('google_id_token', idToken, { expires: 7, secure: true, sameSite: 'Lax' });
+      params.delete('id_token');
+    }
+
+    // Clean the URL
+    if (accessToken || idToken) {
+      window.history.replaceState({}, document.title, `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchImages = async () => {
