@@ -32,6 +32,7 @@ export async function GET(req: Request) {
             // secure: process.env.NODE_ENV === 'production',  // send cookie over HTTPS only in production
             path: '/',  // cookie is available on every route
             maxAge: 60 * 60 * 24 * 7,  // 1 week
+            domain: new URL(req.url).hostname.includes('vercel.app') ? '.vercel.app' : undefined, // Set domain for Vercel deployments
         });
 
         cookies().set({
@@ -41,6 +42,7 @@ export async function GET(req: Request) {
             // secure: process.env.NODE_ENV === 'production',
             path: '/',
             maxAge: 60 * 60 * 24 * 7,
+            domain: new URL(req.url).hostname.includes('vercel.app') ? '.vercel.app' : undefined, // Set domain for Vercel deployments
         });
 
         return NextResponse.redirect(new URL('/dashboard', req.url));
