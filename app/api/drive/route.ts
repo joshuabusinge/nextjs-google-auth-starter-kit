@@ -28,23 +28,29 @@ export async function GET(req: Request) {
     const folderId = searchParams.get('folderId');
     const fileId = searchParams.get('fileId');
 
+    console.log(`[Drive API] Request for folderId: ${folderId}, fileId: ${fileId}`);
+
     const accessToken = cookies().get('google_access_token')?.value;
 
     if (!accessToken) {
+        console.error('[Drive API] No access token found.');
         return NextResponse.json({ error: 'No access token found' }, { status: 401 });
     }
 
+    console.log('[Drive API] Access token found.');
     oauth2Client.setCredentials({ access_token: accessToken });
     const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
     if (fileId) {
         // Handle single file download
         try {
+            console.log(`[Drive API] Attempting to fetch file: ${fileId}`);
             const response = await drive.files.get({
                 fileId: fileId,
                 alt: 'media',
             }, { responseType: 'stream' });
 
+            console.log(`[Drive API] Successfully fetched file stream for: ${fileId}`);
             const headers = new Headers();
             headers.set('Content-Type', response.headers['content-type'] as string);
             headers.set('Content-Disposition', response.headers['content-disposition'] as string);
@@ -53,23 +59,26 @@ export async function GET(req: Request) {
 
             return new NextResponse(webStream, { headers });
         } catch (error: unknown) {
-            console.error('Error fetching Google Drive file:', (error as Error).message);
+            console.error('[Drive API] Error fetching Google Drive file:', (error as Error).message);
             return NextResponse.json({ error: 'Failed to fetch file from Google Drive', details: (error as Error).message }, { status: 500 });
         }
     } else if (folderId) {
         // Handle folder listing (existing logic)
         try {
+            console.log(`[Drive API] Attempting to list files in folder: ${folderId}`);
             const response = await drive.files.list({
                 q: `'${folderId}' in parents and mimeType contains 'image/'`,
                 fields: 'nextPageToken, files(id, name, mimeType, webContentLink, webViewLink)',
                 spaces: 'drive',
             });
+            console.log(`[Drive API] Successfully listed ${response.data.files?.length || 0} files in folder: ${folderId}`);
             return NextResponse.json(response.data.files);
         } catch (error: unknown) {
-            console.error('Error listing Google Drive files:', (error as Error).message);
+            console.error('[Drive API] Error listing Google Drive files:', (error as Error).message);
             return NextResponse.json({ error: 'Failed to list files from Google Drive', details: (error as Error).message }, { status: 500 });
         }
     } else {
+        console.error('[Drive API] Folder ID or File ID is required.');
         return NextResponse.json({ error: 'Folder ID or File ID is required' }, { status: 400 });
     }
 }
