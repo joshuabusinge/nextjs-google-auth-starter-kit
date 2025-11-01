@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
 import { cookies } from 'next/headers';
 import { Readable } from 'stream';
+import { drive_v3 } from 'googleapis';
 
 const CSV_FILE_NAME = 'image_labels.csv';
 const CSV_HEADERS = 'timestamp,userEmail,imageId,imageName,score1,score2,score3,score4,score5,score6,comments\n';
@@ -96,11 +97,12 @@ export async function POST(req: Request) {
 
         if (csvFileId) {
             // 3. Update existing CSV file
-            await drive.files.update({
+            const updateParams: drive_v3.Params$Resource$Files$Update = {
                 fileId: csvFileId,
-                addParents: folderId, // A string: the ID of the folder to add as a parent.
+                addParents: folderId,
                 media,
-            });
+            };
+            await drive.files.update(updateParams);
         } else {
             // 4. Create new CSV file
             await drive.files.create({
