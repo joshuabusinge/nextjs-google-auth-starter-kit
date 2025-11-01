@@ -32,10 +32,10 @@ export async function GET(req: Request) {
             secure: process.env.NODE_ENV === 'production',  // send cookie over HTTPS only in production
             path: '/',  // cookie is available on every route
             maxAge: 60 * 60 * 24 * 7,  // 1 week
-            domain: new URL(req.url).hostname.includes('vercel.app') ? '.vercel.app' : undefined, // Set domain for Vercel deployments
+            domain: new URL(req.url).hostname.includes('vercel.app') ? req.headers.get('host') : undefined, // Set domain for Vercel deployments
         });
 
-        console.log(`[OAuth2 Callback] Setting google_access_token: domain=${new URL(req.url).hostname.includes('vercel.app') ? '.vercel.app' : ''}, secure=${process.env.NODE_ENV === 'production'}, httpOnly=true, path=/`);
+        console.log(`[OAuth2 Callback] Setting google_access_token: domain=${new URL(req.url).hostname.includes('vercel.app') ? req.headers.get('host') : ''}, secure=${process.env.NODE_ENV === 'production'}, httpOnly=true, path=/`);
 
         cookies().set({
             name: 'google_id_token',
@@ -44,10 +44,10 @@ export async function GET(req: Request) {
             secure: process.env.NODE_ENV === 'production',
             path: '/',
             maxAge: 60 * 60 * 24 * 7,
-            domain: new URL(req.url).hostname.includes('vercel.app') ? '.vercel.app' : undefined, // Set domain for Vercel deployments
+            domain: new URL(req.url).hostname.includes('vercel.app') ? req.headers.get('host') : undefined, // Set domain for Vercel deployments
         });
 
-        console.log(`[OAuth2 Callback] Setting google_id_token: domain=${new URL(req.url).hostname.includes('vercel.app') ? '.vercel.app' : ''}, secure=${process.env.NODE_ENV === 'production'}, httpOnly=true, path=/`);
+        console.log(`[OAuth2 Callback] Setting google_id_token: domain=${new URL(req.url).hostname.includes('vercel.app') ? req.headers.get('host') : ''}, secure=${process.env.NODE_ENV === 'production'}, httpOnly=true, path=/`);
 
         return NextResponse.redirect(new URL('/dashboard', req.url));
 
