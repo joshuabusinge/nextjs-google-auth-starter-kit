@@ -31,6 +31,7 @@ export async function GET(req: Request) {
     console.log(`[Drive API] Request for folderId: ${folderId}, fileId: ${fileId}`);
 
     const accessToken = cookies().get('google_access_token')?.value;
+    console.log(`[Drive API] Retrieved access token: ${accessToken ? 'Found' : 'Not Found'}`);
 
     if (!accessToken) {
         console.error('[Drive API] No access token found.');
