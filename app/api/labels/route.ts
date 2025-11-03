@@ -9,7 +9,6 @@ const CSV_FILE_NAME = 'image_labels.csv';
 const CSV_HEADERS = 'timestamp,userEmail,imageId,imageName,Mid-sagittal_section,Neutral_position,Horizontal_orientation,Crown_and_rump_clearly_visible,Correct_caliper_placement,Magnification,comments\n';
 
 export async function POST(req: Request) {
-    console.log("Incoming /api/labels request headers:", req.headers);
     try {
         const { imageId, imageName, scores, comments, folderId } = await req.json();
 
@@ -21,8 +20,6 @@ export async function POST(req: Request) {
         const accessToken = authorization?.split(' ')[1];
         const idToken = req.headers.get('x-google-id-token');
 
-        console.log(`[Labels API] Received idToken: ${idToken ? 'Found' : 'Not Found'}`);
-
         if (!accessToken || !idToken) {
             return NextResponse.json({ error: 'Authentication tokens not found in headers' }, { status: 401 });
         }
@@ -33,7 +30,6 @@ export async function POST(req: Request) {
         let userEmail = 'unknown@example.com';
         try {
             const audience = process.env.CLIENT_ID;
-            console.log(`[Labels API] Verifying idToken with audience: ${audience}`);
             const ticket = await oauth2Client.verifyIdToken({
                 idToken,
                 audience,
@@ -41,13 +37,9 @@ export async function POST(req: Request) {
             const payload = ticket.getPayload();
             if (payload?.email) {
                 userEmail = payload.email;
-                console.log(`[Labels API] User email retrieved: ${userEmail}`);
-            } else {
-                console.log('[Labels API] ID Token payload did not contain an email.');
             }
         } catch (idTokenError: unknown) {
             console.error('[Labels API] Error verifying ID token:', idTokenError);
-            // Continue with default email if verification fails
         }
 
         const timestamp = new Date().toISOString();

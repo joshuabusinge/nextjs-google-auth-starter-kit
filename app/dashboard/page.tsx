@@ -197,21 +197,15 @@ export default function DashboardPage() {
     const accessToken = params.get('access_token');
     const idToken = params.get('id_token');
 
-    console.log('[Dashboard] URL Search Params:', window.location.search);
-    console.log('[Dashboard] Extracted accessToken from URL:', accessToken ? 'Found' : 'Not Found');
-    console.log('[Dashboard] Extracted idToken from URL:', idToken ? 'Found' : 'Not Found');
-
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieOptions = { expires: 7, sameSite: 'Lax' as const, secure: isProduction };
 
     if (accessToken) {
       Cookies.set('google_access_token', accessToken, cookieOptions);
-      console.log('[Dashboard] google_access_token set. Value:', Cookies.get('google_access_token') ? 'Found' : 'Not Found');
       params.delete('access_token');
     }
     if (idToken) {
       Cookies.set('google_id_token', idToken, cookieOptions);
-      console.log('[Dashboard] google_id_token set. Value:', Cookies.get('google_id_token') ? 'Found' : 'Not Found');
       params.delete('id_token');
     }
 
@@ -219,10 +213,6 @@ export default function DashboardPage() {
     if (accessToken || idToken) {
       window.history.replaceState({}, document.title, `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`);
     }
-    console.log('[Dashboard] Cookies after useEffect:', {
-      access_token: Cookies.get('google_access_token'),
-      id_token: Cookies.get('google_id_token'),
-    });
   }, []);
 
   useEffect(() => {
@@ -235,7 +225,6 @@ export default function DashboardPage() {
       setError(null);
       try {
         const accessToken = Cookies.get('google_access_token');
-        console.log('[Dashboard: fetchImages] Access Token from cookie:', accessToken ? 'Found' : 'Not Found');
         if (!accessToken) {
           throw new Error("Access token not found in client-side cookies.");
         }
