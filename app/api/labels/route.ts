@@ -21,6 +21,8 @@ export async function POST(req: Request) {
         const accessToken = authorization?.split(' ')[1];
         const idToken = req.headers.get('x-google-id-token');
 
+        console.log(`[Labels API] Received idToken: ${idToken ? 'Found' : 'Not Found'}`);
+
         if (!accessToken || !idToken) {
             return NextResponse.json({ error: 'Authentication tokens not found in headers' }, { status: 401 });
         }
@@ -30,16 +32,21 @@ export async function POST(req: Request) {
 
         let userEmail = 'unknown@example.com';
         try {
+            const audience = process.env.CLIENT_ID;
+            console.log(`[Labels API] Verifying idToken with audience: ${audience}`);
             const ticket = await oauth2Client.verifyIdToken({
                 idToken,
-                audience: process.env.CLIENT_ID,
+                audience,
             });
             const payload = ticket.getPayload();
             if (payload?.email) {
                 userEmail = payload.email;
+                console.log(`[Labels API] User email retrieved: ${userEmail}`);
+            } else {
+                console.log('[Labels API] ID Token payload did not contain an email.');
             }
-        } catch (idTokenError) {
-            console.error('Error verifying ID token:', idTokenError);
+        } catch (idTokenError: unknown) {
+            console.error('[Labels API] Error verifying ID token:', idTokenError);
             // Continue with default email if verification fails
         }
 
