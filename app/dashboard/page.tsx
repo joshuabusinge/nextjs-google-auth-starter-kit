@@ -185,11 +185,11 @@ export default function DashboardPage() {
     const idToken = params.get('id_token');
 
     if (accessToken) {
-      Cookies.set('google_access_token', accessToken, { expires: 7, secure: true, sameSite: 'Lax' });
+      Cookies.set('google_access_token', accessToken, { expires: 7, sameSite: 'Lax' });
       params.delete('access_token');
     }
     if (idToken) {
-      Cookies.set('google_id_token', idToken, { expires: 7, secure: true, sameSite: 'Lax' });
+      Cookies.set('google_id_token', idToken, { expires: 7, sameSite: 'Lax' });
       params.delete('id_token');
     }
 
