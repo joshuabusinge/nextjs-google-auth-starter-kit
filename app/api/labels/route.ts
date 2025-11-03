@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 import { drive_v3 } from 'googleapis';
 
 const CSV_FILE_NAME = 'image_labels.csv';
-const CSV_HEADERS = 'timestamp,userEmail,imageId,imageName,score1,score2,score3,score4,score5,score6,comments\n';
+const CSV_HEADERS = 'timestamp,userEmail,imageId,imageName,Mid-sagittal_section,Neutral_position,Horizontal_orientation,Crown_and_rump_clearly_visible,Correct_caliper_placement,Magnification,comments\n';
 
 export async function POST(req: Request) {
     console.log("Incoming /api/labels request headers:", req.headers);
