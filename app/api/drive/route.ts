@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
 import { Readable } from 'stream';
+import { cookies } from 'next/headers'; // Import cookies
 
 function convertToWebStream(nodeStream: Readable): ReadableStream<Uint8Array> {
     return new ReadableStream({
@@ -37,24 +38,20 @@ export async function GET(req: Request) {
         accessToken = authorization.split(' ')[1];
     }
 
-    // If access token not found in header, try to get it from cookies (for Next.js Image component requests)
+    // If access token not found in header, try to get it from Next.js cookies utility
     if (!accessToken) {
-        const cookieHeader = req.headers.get('cookie');
-        console.log(`[Drive API] No Authorization header, checking cookies. Received Cookie header: ${cookieHeader ? 'Found' : 'Not Found'}`);
-        if (cookieHeader) {
-            const cookies = cookieHeader.split(';').map(s => s.trim().split('='));
-            const googleAccessTokenCookie = cookies.find(cookie => cookie[0] === 'google_access_token');
-            if (googleAccessTokenCookie) {
-                accessToken = googleAccessTokenCookie[1];
-                console.log('[Drive API] Retrieved access token from cookie.');
-            }
+        const cookieStore = cookies();
+        const googleAccessTokenCookie = cookieStore.get('google_access_token');
+        console.log(`[Drive API] No Authorization header, checking Next.js cookies. google_access_token found: ${!!googleAccessTokenCookie}`);
+        if (googleAccessTokenCookie) {
+            accessToken = googleAccessTokenCookie.value;
         }
     }
 
     console.log(`[Drive API] Retrieved access token: ${accessToken ? 'Found' : 'Not Found'}`);
 
     if (!accessToken) {
-        console.error('[Drive API] No access token found after checking headers and cookies.');
+        console.error('[Drive API] No access token found after checking headers and Next.js cookies.');
         return NextResponse.json({ error: 'No access token found' }, { status: 401 });
     }
 
