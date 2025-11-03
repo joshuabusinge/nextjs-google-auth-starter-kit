@@ -30,6 +30,7 @@ export async function GET(req: Request) {
     console.log(`[Drive API] Request for folderId: ${folderId}, fileId: ${fileId}`);
 
     const authorization = req.headers.get('authorization');
+    console.log(`[Drive API] Received Authorization header: ${authorization}`);
     const accessToken = authorization?.split(' ')[1];
 
     console.log(`[Drive API] Retrieved access token: ${accessToken ? 'Found' : 'Not Found'}`);
