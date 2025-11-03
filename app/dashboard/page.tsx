@@ -29,6 +29,19 @@ export default function DashboardPage() {
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
+  const imageLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
+    const accessToken = Cookies.get('google_access_token');
+    const url = new URL(src, window.location.origin);
+    if (accessToken) {
+      url.searchParams.set('accessToken', accessToken);
+    }
+    url.searchParams.set('w', width.toString());
+    if (quality) {
+      url.searchParams.set('q', quality.toString());
+    }
+    return url.toString();
+  };
+
   const preloadImage = (url: string) => {
     // Using typeof window.Image to access the browser's global Image constructor
     // as 'Image' might not be directly recognized in some Next.js environments or during SSR.
@@ -349,6 +362,7 @@ export default function DashboardPage() {
             <div ref={imageContainerRef} className="relative w-full h-96 bg-gray-200 flex items-center justify-center rounded-md overflow-hidden" style={{ cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}>
               <Image
                 ref={imageRef}
+                loader={imageLoader}
                 src={`/api/drive?fileId=${currentImage.id}`}
                 alt={currentImage.name}
                 style={{

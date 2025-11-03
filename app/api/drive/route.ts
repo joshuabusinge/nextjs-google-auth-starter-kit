@@ -32,26 +32,38 @@ export async function GET(req: Request) {
 
     let accessToken: string | undefined;
 
-    const authorization = req.headers.get('authorization');
-    console.log(`[Drive API] Received Authorization header: ${authorization}`);
-    if (authorization) {
-        accessToken = authorization.split(' ')[1];
+    // Prioritize checking the 'accessToken' query parameter (from custom image loader)
+    const accessTokenFromQuery = searchParams.get('accessToken');
+    if (accessTokenFromQuery) {
+        accessToken = accessTokenFromQuery;
+        console.log('[Drive API] Retrieved access token from query parameter.');
     }
 
-    // If access token not found in header, try to get it from Next.js cookies utility
+    // Fallback to Authorization header if not found in query
+    if (!accessToken) {
+        const authorization = req.headers.get('authorization');
+        console.log(`[Drive API] Received Authorization header: ${authorization}`);
+        if (authorization) {
+            accessToken = authorization.split(' ')[1];
+            console.log('[Drive API] Retrieved access token from Authorization header.');
+        }
+    }
+
+    // Fallback to Next.js cookies utility if not found in query or header
     if (!accessToken) {
         const cookieStore = cookies();
         const googleAccessTokenCookie = cookieStore.get('google_access_token');
-        console.log(`[Drive API] No Authorization header, checking Next.js cookies. google_access_token found: ${!!googleAccessTokenCookie}`);
+        console.log(`[Drive API] No access token in query or Authorization header, checking Next.js cookies. google_access_token found: ${!!googleAccessTokenCookie}`);
         if (googleAccessTokenCookie) {
             accessToken = googleAccessTokenCookie.value;
+            console.log('[Drive API] Retrieved access token from Next.js cookies.');
         }
     }
 
     console.log(`[Drive API] Retrieved access token: ${accessToken ? 'Found' : 'Not Found'}`);
 
     if (!accessToken) {
-        console.error('[Drive API] No access token found after checking headers and Next.js cookies.');
+        console.error('[Drive API] No access token found after checking all sources.');
         return NextResponse.json({ error: 'No access token found' }, { status: 401 });
     }
 
