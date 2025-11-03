@@ -11,6 +11,7 @@ export default function Home() {
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive.appdata",
     "https://www.googleapis.com/auth/drive.photos.readonly",
+    "email",
   ];
 
   //where do i store this state
