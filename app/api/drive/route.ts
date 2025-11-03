@@ -29,14 +29,32 @@ export async function GET(req: Request) {
 
     console.log(`[Drive API] Request for folderId: ${folderId}, fileId: ${fileId}`);
 
+    let accessToken: string | undefined;
+
     const authorization = req.headers.get('authorization');
     console.log(`[Drive API] Received Authorization header: ${authorization}`);
-    const accessToken = authorization?.split(' ')[1];
+    if (authorization) {
+        accessToken = authorization.split(' ')[1];
+    }
+
+    // If access token not found in header, try to get it from cookies (for Next.js Image component requests)
+    if (!accessToken) {
+        const cookieHeader = req.headers.get('cookie');
+        console.log(`[Drive API] No Authorization header, checking cookies. Received Cookie header: ${cookieHeader ? 'Found' : 'Not Found'}`);
+        if (cookieHeader) {
+            const cookies = cookieHeader.split(';').map(s => s.trim().split('='));
+            const googleAccessTokenCookie = cookies.find(cookie => cookie[0] === 'google_access_token');
+            if (googleAccessTokenCookie) {
+                accessToken = googleAccessTokenCookie[1];
+                console.log('[Drive API] Retrieved access token from cookie.');
+            }
+        }
+    }
 
     console.log(`[Drive API] Retrieved access token: ${accessToken ? 'Found' : 'Not Found'}`);
 
     if (!accessToken) {
-        console.error('[Drive API] No access token found.');
+        console.error('[Drive API] No access token found after checking headers and cookies.');
         return NextResponse.json({ error: 'No access token found' }, { status: 401 });
     }
 
