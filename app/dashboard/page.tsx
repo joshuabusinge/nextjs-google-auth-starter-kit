@@ -286,9 +286,6 @@ export default function DashboardPage() {
         const newScores = [...scores];
         newScores[focusedCriterionIndex] = scoreValue;
         setScores(newScores);
-      } else if (event.key === 's' || event.key === 'S') {
-        // Shortcut for Save button
-        handleSave();
       }
     };
 
