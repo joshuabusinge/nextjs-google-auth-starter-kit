@@ -55,16 +55,16 @@ export default function DashboardPage() {
     "Horizontal orientation",
     "Crown and rump clearly visible",
     "Correct caliper placement",
-    "Magnification",
+    "Good magnification",
   ];
 
   const descriptions = [
-    "Midline facial profile, fetal spine and rump all visible in one complete image. Zoom box and sample gate in center of vessel",
-    "Fluid visible between the chin and the chest of the fetus and the profile line",
+    "Midline facial profile, fetal spine and rump should all be visible in one complete image",
+    "There should be fluid visible between the chin and the chest of the fetus and the 'profile line' should form an acute angle with the CRL line before the rump",
     "Fetus should be horizontal with line connecting crown and rump positioned between 75° and 105° to ultrasound beam",
     "Crown and rump should both be clearly visible",
-    "Should be placed correctly (outer border of skin covering skull and outer border of skin covering rump)",
-    "Fetus should fill more than two-thirds of image",
+    "Intersection of calipers should be on outer border of skin covering skull and outer border of skin covering rump",
+    "Fetus should fill more than two-thirds of image, clearly showing crown and rump",
   ];
 
   const currentImage = images[currentImageIndex];
@@ -382,6 +382,9 @@ export default function DashboardPage() {
 
           <div className="labeling-interface">
             <h2 className="text-xl font-semibold mb-4">CRL measurement</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Reference: <a href="https://obgyn.onlinelibrary.wiley.com/doi/10.1002/uog.13376" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Table 1. Image-scoring criteria for crown-rump length (CRL) measurement</a>
+            </p>
             <div className="overflow-x-auto">
               <table className="min-w-full bg-white border border-gray-200 rounded-md">
                 <thead>
