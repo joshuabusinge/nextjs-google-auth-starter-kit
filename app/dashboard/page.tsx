@@ -369,9 +369,11 @@ export default function DashboardPage() {
                 Previous
               </button>
               <button
-                onClick={() =>
-                  setCurrentImageIndex((prev) => Math.min(images.length - 1, prev + 1))
-                }
+                onClick={() => {
+                  setCurrentImageIndex((prev) => Math.min(images.length - 1, prev + 1));
+                  setScores(Array(6).fill(0));
+                  setComments("N/A");
+                }}
                 disabled={currentImageIndex === images.length - 1 || isLoading}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400"
               >
