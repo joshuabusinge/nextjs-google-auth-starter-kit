@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
+import { format } from 'date-fns';
 // import { cookies } from 'next/headers'; // No longer reading cookies directly
 import { Readable } from 'stream';
 import { drive_v3 } from 'googleapis';
 
 const CSV_FILE_NAME = 'image_labels.csv';
-const CSV_HEADERS = 'timestamp,userEmail,imageId,imageName,Mid-sagittal_section,Neutral_position,Horizontal_orientation,Crown_and_rump_clearly_visible,Correct_caliper_placement,Magnification,comments\n';
+const CSV_HEADERS = 'time_date,userEmail,imageId,imageName,Mid-sagittal_section,Neutral_position,Horizontal_orientation,Crown_and_rump_clearly_visible,Correct_caliper_placement,Magnification,comments\n';
 
 export async function POST(req: Request) {
     try {
@@ -42,9 +43,11 @@ export async function POST(req: Request) {
             console.error('[Labels API] Error verifying ID token:', idTokenError);
         }
 
-        const timestamp = new Date().toISOString();
+        const now = new Date();
+        const timestamp = format(now, 'HH:mm');
+        const date = format(now, 'dd/MM/yyyy');
         const scoreString = scores.join(',');
-        const newRow = `${timestamp},${userEmail},${imageId},${imageName},${scoreString},"${comments.replace(/"/g, '""')}"\n`;
+        const newRow = `${timestamp} ${date},${userEmail},${imageId},${imageName},${scoreString},"${comments.replace(/"/g, '""')}"\n`;
 
         // 1. Search for the CSV file in the specified folder
         let csvFileId: string | undefined;
