@@ -362,7 +362,11 @@ export default function DashboardPage() {
             </div>
             <div className="flex justify-between mt-4">
               <button
-                onClick={() => setCurrentImageIndex((prev) => Math.max(0, prev - 1))}
+                onClick={() => {
+                  setCurrentImageIndex((prev) => Math.max(0, prev - 1));
+                  setScores(Array(6).fill(0));
+                  setComments("N/A");
+                }}
                 disabled={currentImageIndex === 0 || isLoading}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400"
               >
