@@ -61,11 +61,11 @@ async function getAllDriveFilesInFolder(
 }
 
 interface DriveFile {
-    id: string;
-    name: string;
-    mimeType: string;
-    webContentLink: string;
-    webViewLink: string;
+    id: string | null | undefined;
+    name: string | null | undefined;
+    mimeType: string | null | undefined;
+    webContentLink: string | null | undefined;
+    webViewLink: string | null | undefined;
 }
 
 export async function GET(req: Request) {
