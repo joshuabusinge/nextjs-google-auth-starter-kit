@@ -31,7 +31,7 @@ function convertToWebStream(nodeStream: Readable): ReadableStream<Uint8Array> {
  * @returns A promise that resolves to an array of DriveFile objects.
  */
 async function getAllDriveFilesInFolder(
-    drive: any, // Changing to `drive_v3.Drive` does not work because it is not directly exported.
+    drive: ReturnType<typeof google.drive>, // Correctly inferring the type of 'drive'
     folderId: string,
     pageToken: string | undefined = undefined,
     allFiles: DriveFile[] = []
