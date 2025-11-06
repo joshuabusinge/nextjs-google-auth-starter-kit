@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import oauth2Client from '../../lib/google-oauth';
 import { Readable } from 'stream';
 import { cookies } from 'next/headers'; // Import cookies
+import { drive_v3 } from 'googleapis'; // Import drive_v3
 
 function convertToWebStream(nodeStream: Readable): ReadableStream<Uint8Array> {
     return new ReadableStream({
@@ -45,10 +46,10 @@ async function getAllDriveFilesInFolder(
     });
 
     const files = response.data.files || [];
-    allFiles.push(...files.map((file: DriveFile) => ({
-        id: file.id!,
-        name: file.name!,
-        mimeType: file.mimeType!,
+    allFiles.push(...files.map((file: drive_v3.Schema$File) => ({
+        id: file.id || '',
+        name: file.name || '',
+        mimeType: file.mimeType || '',
         webContentLink: file.webContentLink || '',
         webViewLink: file.webViewLink || '',
     })));
