@@ -22,6 +22,51 @@ function convertToWebStream(nodeStream: Readable): ReadableStream<Uint8Array> {
         },
     });
 }
+/**
+ * Recursively fetches all image files from a specified Google Drive folder, handling pagination.
+ * @param drive The Google Drive API client.
+ * @param folderId The ID of the folder to search within.
+ * @param pageToken The page token for the next set of results (for pagination).
+ * @param allFiles Accumulator for files found so far.
+ * @returns A promise that resolves to an array of DriveFile objects.
+ */
+async function getAllDriveFilesInFolder(
+    drive: any, // Changing to `drive_v3.Drive` does not work because it is not directly exported.
+    folderId: string,
+    pageToken: string | undefined = undefined,
+    allFiles: DriveFile[] = []
+): Promise<DriveFile[]> {
+    const response = await drive.files.list({
+        q: `'${folderId}' in parents and mimeType contains 'image/' and trashed=false`,
+        fields: 'nextPageToken, files(id, name, mimeType, webContentLink, webViewLink)',
+        spaces: 'drive',
+        pageToken: pageToken,
+        pageSize: 1000, // Fetch up to 1000 files per request
+    });
+
+    const files = response.data.files || [];
+    allFiles.push(...files.map((file: DriveFile) => ({
+        id: file.id!,
+        name: file.name!,
+        mimeType: file.mimeType!,
+        webContentLink: file.webContentLink || '',
+        webViewLink: file.webViewLink || '',
+    })));
+
+    if (response.data.nextPageToken) {
+        return getAllDriveFilesInFolder(drive, folderId, response.data.nextPageToken, allFiles);
+    }
+
+    return allFiles;
+}
+
+interface DriveFile {
+    id: string;
+    name: string;
+    mimeType: string;
+    webContentLink: string;
+    webViewLink: string;
+}
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -85,12 +130,8 @@ export async function GET(req: Request) {
     } else if (folderId) {
         // Handle folder listing (existing logic)
         try {
-            const response = await drive.files.list({
-                q: `'${folderId}' in parents and mimeType contains 'image/'`,
-                fields: 'nextPageToken, files(id, name, mimeType, webContentLink, webViewLink)',
-                spaces: 'drive',
-            });
-            return NextResponse.json(response.data.files);
+            const allImageFiles = await getAllDriveFilesInFolder(drive, folderId);
+            return NextResponse.json(allImageFiles);
         } catch (error: unknown) {
             console.error('[Drive API] Error listing Google Drive files:', (error as Error).message);
             return NextResponse.json({ error: 'Failed to list files from Google Drive', details: (error as Error).message }, { status: 500 });
